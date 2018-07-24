@@ -1,6 +1,7 @@
 #include <QtNetwork>
 #include <QtWidgets>
 #include "MyServer.h"
+#include <QVector>
 
 // ----------------------------------------------------------------------
 MyServer::MyServer(int nPort, QWidget* pwgt /*=0*/) : QWidget(pwgt)
@@ -40,7 +41,8 @@ MyServer::MyServer(int nPort, QWidget* pwgt /*=0*/) : QWidget(pwgt)
     connect(pClientSocket, SIGNAL(readyRead()), 
             this,          SLOT(slotReadClient())
            );
-
+    globalconnections.push_back(pClientSocket);
+    m_ptxt->append("NewUser " + QString::number(globalconnections.size()-1));
     sendToClient(pClientSocket, "Server Response: Connected!");
 }
 
@@ -65,14 +67,20 @@ void MyServer::slotReadClient()
         QString str;
         in >> time >> str;
 
-        QString strMessage = 
-            time.toString() + " " + "Client has sent - " + str;
+        QString strMessage =
+            time.toString() + " " + /*QString::number(i) +*/ " " + "Client has sent - " + str;
         m_ptxt->append(strMessage);
+
+        for (int i = 0; i < globalconnections.size(); i++) {
+            if (globalconnections[i] != pClientSocket ) {
+                sendToClient(globalconnections[i],"Other message: " + str);
+            }
+        }
 
         m_nNextBlockSize = 0;
 
-        sendToClient(pClientSocket, 
-                     "Server Response: Received \"" + str + "\""
+        sendToClient(pClientSocket,
+                     "Your message: "  + str
                     );
     }
 }

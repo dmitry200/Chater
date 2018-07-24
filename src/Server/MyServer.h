@@ -13,6 +13,7 @@ private:
     QTcpServer* m_ptcpServer;
     QTextEdit*  m_ptxt;
     quint16     m_nNextBlockSize;
+    QVector<QTcpSocket*> globalconnections;
 
 private:
     void sendToClient(QTcpSocket* pSocket, const QString& str);
